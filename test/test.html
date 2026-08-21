@@ -1,0 +1,135 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>deAdditizer tests</title>
+  </head>
+
+  <body>
+    <p id="summary"></p>
+
+    <ul id="results"></ul>
+
+    <script type="module">
+      import { deAdditize } from "../src/index.js";
+      import { additiveComponents } from "../src/components.js";
+
+      const summary = document.querySelector("#summary");
+      const results = document.querySelector("#results");
+
+      let passed = 0;
+      let failed = 0;
+
+      function test(name, callback) {
+        const item = document.createElement("li");
+
+        try {
+          callback();
+
+          passed++;
+          item.textContent = `PASS: ${name}`;
+          console.log(`PASS: ${name}`);
+        } catch (error) {
+          failed++;
+          item.textContent = `FAIL: ${name} — ${error.message}`;
+          console.error(`FAIL: ${name}`, error);
+        }
+
+        results.appendChild(item);
+      }
+
+      function assertEqual(actual, expected, message) {
+        if (actual !== expected) {
+          throw new Error(
+            `${message}\nExpected: ${expected}\nActual: ${actual}`,
+          );
+        }
+      }
+
+      test("removes ac from normal component", () => {
+        const xml =
+          '<vehicle><c d="normal_block"><o bc="E232" ac="E232" sc="6"/></c></vehicle>';
+
+        const expected =
+          '<vehicle><c d="normal_block"><o bc="E232" sc="6"/></c></vehicle>';
+
+        const result = deAdditize(xml);
+
+        assertEqual(result.data, expected, "Output was modified incorrectly");
+        assertEqual(result.blocksChanged, 1, "Wrong blocksChanged count");
+        assertEqual(result.blocksPreserved, 0, "Wrong blocksPreserved count");
+      });
+
+      test("preserves ac on additive component", () => {
+        const componentName = [...additiveComponents][0];
+
+        if (!componentName) {
+          throw new Error("No additive components are defined");
+        }
+
+        const xml = `<vehicle><c d="${componentName}"><o bc="E232" ac="E232" sc="6"/></c></vehicle>`;
+
+        const result = deAdditize(xml);
+
+        assertEqual(result.data, xml, "Additive component was modified");
+        assertEqual(result.blocksChanged, 0, "Wrong blocksChanged count");
+        assertEqual(result.blocksPreserved, 1, "Wrong blocksPreserved count");
+      });
+
+      test("leaves component without ac untouched", () => {
+        const xml =
+          '<vehicle><c d="normal_block"><o bc="E232" sc="6"/></c></vehicle>';
+
+        const result = deAdditize(xml);
+
+        assertEqual(result.data, xml, "Component without ac was modified");
+        assertEqual(result.blocksChanged, 0, "Wrong blocksChanged count");
+        assertEqual(result.blocksPreserved, 0, "Wrong blocksPreserved count");
+      });
+
+      test("handles mixed components correctly", () => {
+        const componentName = [...additiveComponents][0];
+
+        if (!componentName) {
+          throw new Error("No additive components are defined");
+        }
+
+        const xml = `<vehicle><c d="normal_block"><o ac="E232"/></c><c d="${componentName}"><o ac="E232"/></c><c d="normal_block"><o bc="E232"/></c><c d="normal_block"><o ac="59FF"/></c></vehicle>`;
+
+        const expected = `<vehicle><c d="normal_block"><o/></c><c d="${componentName}"><o ac="E232"/></c><c d="normal_block"><o bc="E232"/></c><c d="normal_block"><o/></c></vehicle>`;
+
+        const result = deAdditize(xml);
+
+        assertEqual(
+          result.data,
+          expected,
+          "Mixed components were handled incorrectly",
+        );
+        assertEqual(result.blocksChanged, 2, "Wrong blocksChanged count");
+        assertEqual(result.blocksPreserved, 1, "Wrong blocksPreserved count");
+      });
+
+      test("removes multiple ac attributes without artifacts", () => {
+        const xml =
+          '<vehicle><c d="normal_block"><o r="1" bc="E232" ac="E232" sc="6"/></c><c d="normal_block"><o bc="59FF" ac="59FF" sc="17"/></c><c d="normal_block"><o bc="FFFFFF" ac="FFFFFF" sc="6"/></c></vehicle>';
+
+        const expected =
+          '<vehicle><c d="normal_block"><o r="1" bc="E232" sc="6"/></c><c d="normal_block"><o bc="59FF" sc="17"/></c><c d="normal_block"><o bc="FFFFFF" sc="6"/></c></vehicle>';
+
+        const result = deAdditize(xml);
+
+        assertEqual(result.data, expected, "Multiple removals left artifacts");
+        assertEqual(result.blocksChanged, 3, "Wrong blocksChanged count");
+        assertEqual(result.blocksPreserved, 0, "Wrong blocksPreserved count");
+      });
+
+      summary.textContent = `${passed} passed, ${failed} failed`;
+
+      if (failed === 0) {
+        console.log("ALL TESTS PASSED");
+      } else {
+        console.error("TESTS FAILED");
+      }
+    </script>
+  </body>
+</html>
