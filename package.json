@@ -2,10 +2,8 @@
   "name": "deadditizer",
   "version": "0.1.0",
   "description": "Browser-based vehicle file additive color remover",
-  "main": "src/index.js",
-  "scripts": {
-    "test": "node --test"
-  },
+  "type": "module",
+  "exports": "./src/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Stormworks-dev/deAdditizer.git"
