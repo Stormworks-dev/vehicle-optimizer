@@ -2,6 +2,7 @@ import {
   defaultRotation,
   additiveComponents,
   nonRotatingComponents,
+  defaultRotationRemovableComponents,
 } from "./components.js";
 
 function isWhitespace(code) {
@@ -410,7 +411,8 @@ function processObject(xml, objectStart, objectEnd, componentEnd, componentId) {
       }
     } else if (matches(xml, nameStart, nameEnd, "r")) {
       if (
-        isDefaultRotation(xml, valueStart, valueEnd) ||
+        (isDefaultRotation(xml, valueStart, valueEnd) &&
+          defaultRotationRemovableComponents.has(componentId)) ||
         (isPureRotation(xml, valueStart, valueEnd) &&
           (componentId === null || nonRotatingComponents.has(componentId)))
       ) {

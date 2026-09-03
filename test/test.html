@@ -12,7 +12,11 @@
 
     <script type="module">
       import { deAdditize } from "../src/index.js";
-      import { additiveComponents } from "../src/components.js";
+      import {
+        additiveComponents,
+        nonRotatingComponents,
+        defaultRotationRemovableComponents,
+      } from "../src/components.js";
 
       const summary = document.querySelector("#summary");
       const results = document.querySelector("#results");
@@ -60,23 +64,19 @@
         assertEqual(result.blocksPreserved, 0, "Wrong blocksPreserved count");
       });
 
-      test("preserves ac and removes numeric sc on additive component", () => {
-        const componentName = [...additiveComponents][0];
+      for (const componentName of additiveComponents) {
+        test(`preserves ac on additive component: ${componentName}`, () => {
+          const xml = `<vehicle><c d="${componentName}"><o bc="E232" ac="E232" sc="6"/></c></vehicle>`;
 
-        if (!componentName) {
-          throw new Error("No additive components are defined");
-        }
+          const expected = `<vehicle><c d="${componentName}"><o bc="E232" ac="E232"/></c></vehicle>`;
 
-        const xml = `<vehicle><c d="${componentName}"><o bc="E232" ac="E232" sc="6"/></c></vehicle>`;
+          const result = deAdditize(xml);
 
-        const expected = `<vehicle><c d="${componentName}"><o bc="E232" ac="E232"/></c></vehicle>`;
-
-        const result = deAdditize(xml);
-
-        assertEqual(result.data, expected, "Output was modified incorrectly");
-        assertEqual(result.blocksChanged, 0, "Wrong blocksChanged count");
-        assertEqual(result.blocksPreserved, 1, "Wrong blocksPreserved count");
-      });
+          assertEqual(result.data, expected, "Output was modified incorrectly");
+          assertEqual(result.blocksChanged, 0, "Wrong blocksChanged count");
+          assertEqual(result.blocksPreserved, 1, "Wrong blocksPreserved count");
+        });
+      }
 
       test("removes numeric sc without ac", () => {
         const xml =
@@ -120,23 +120,53 @@
         assertEqual(result.blocksPreserved, 0, "Wrong blocksPreserved count");
       });
 
-      test("removes default rotation", () => {
+      for (const componentName of defaultRotationRemovableComponents) {
+        test(`removes default rotation: ${componentName}`, () => {
+          const xml = `<vehicle><c d="${componentName}"><o r="1,0,0,0,1,0,0,0,1" bc="E232" sc="6"><vp z="3"/><logic_slots/></o></c></vehicle>`;
+
+          const expected = `<vehicle><c d="${componentName}"><o bc="E232"><vp z="3"/><logic_slots/></o></c></vehicle>`;
+
+          const result = deAdditize(xml);
+
+          assertEqual(
+            result.data,
+            expected,
+            "Default rotation was handled incorrectly",
+          );
+        });
+      }
+
+      test("preserves default rotation on unverified component", () => {
         const xml =
-          '<vehicle><c d="no_sleep"><o r="1,0,0,0,1,0,0,0,1" bc="E232" ac="E232" sc="6"><vp z="3"/><logic_slots/></o></c></vehicle>';
+          '<vehicle><c d="08_wedge_4"><o r="1,0,0,0,1,0,0,0,1" sc="17"><vp y="1"/></o></c></vehicle>';
 
         const expected =
-          '<vehicle><c d="no_sleep"><o bc="E232"><vp z="3"/><logic_slots/></o></c></vehicle>';
+          '<vehicle><c d="08_wedge_4"><o r="1,0,0,0,1,0,0,0,1"><vp y="1"/></o></c></vehicle>';
 
         const result = deAdditize(xml);
 
         assertEqual(
           result.data,
           expected,
-          "Default rotation was handled incorrectly",
+          "Default rotation was incorrectly removed",
         );
-        assertEqual(result.blocksChanged, 1, "Wrong blocksChanged count");
-        assertEqual(result.blocksPreserved, 0, "Wrong blocksPreserved count");
       });
+
+      for (const componentName of nonRotatingComponents) {
+        test(`removes pure rotation: ${componentName}`, () => {
+          const xml = `<vehicle><c d="${componentName}"><o r="1,0,0,0,0,-1,0,1,0" bc="E232"/></c></vehicle>`;
+
+          const expected = `<vehicle><c d="${componentName}"><o bc="E232"/></c></vehicle>`;
+
+          const result = deAdditize(xml);
+
+          assertEqual(
+            result.data,
+            expected,
+            "Pure rotation was handled incorrectly",
+          );
+        });
+      }
 
       test("keeps meaningful sc and removes all bc colors", () => {
         const xml =
