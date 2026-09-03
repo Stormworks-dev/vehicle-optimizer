@@ -509,7 +509,7 @@ function processObject(xml, objectStart, objectEnd, componentEnd, componentId) {
   };
 }
 
-export function deAdditize(xml) {
+export function optimizeVehicle(xml) {
   let cursor = 0;
   let copyCursor = 0;
   let output = null;

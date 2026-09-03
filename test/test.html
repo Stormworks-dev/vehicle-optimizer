@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>deAdditizer tests</title>
+    <title>tests</title>
   </head>
 
   <body>
@@ -11,7 +11,7 @@
     <ul id="results"></ul>
 
     <script type="module">
-      import { deAdditize } from "../src/index.js";
+      import { optimizeVehicle } from "../src/index.js";
       import {
         additiveComponents,
         nonRotatingComponents,
@@ -57,7 +57,7 @@
         const expected =
           '<vehicle><c d="normal_block"><o bc="E232"/></c></vehicle>';
 
-        const result = deAdditize(xml);
+        const result = optimizeVehicle(xml);
 
         assertEqual(result.data, expected, "Output was modified incorrectly");
         assertEqual(result.blocksChanged, 1, "Wrong blocksChanged count");
@@ -70,7 +70,7 @@
 
           const expected = `<vehicle><c d="${componentName}"><o bc="E232" ac="E232"/></c></vehicle>`;
 
-          const result = deAdditize(xml);
+          const result = optimizeVehicle(xml);
 
           assertEqual(result.data, expected, "Output was modified incorrectly");
           assertEqual(result.blocksChanged, 0, "Wrong blocksChanged count");
@@ -85,7 +85,7 @@
         const expected =
           '<vehicle><c d="normal_block"><o bc="E232"/></c></vehicle>';
 
-        const result = deAdditize(xml);
+        const result = optimizeVehicle(xml);
 
         assertEqual(result.data, expected, "Output was modified incorrectly");
         assertEqual(result.blocksChanged, 0, "Wrong blocksChanged count");
@@ -95,7 +95,7 @@
       test("leaves component without ac or sc untouched", () => {
         const xml = '<vehicle><c d="normal_block"><o bc="E232"/></c></vehicle>';
 
-        const result = deAdditize(xml);
+        const result = optimizeVehicle(xml);
 
         assertEqual(result.data, xml, "Component was modified");
         assertEqual(result.blocksChanged, 0, "Wrong blocksChanged count");
@@ -109,7 +109,7 @@
         const expected =
           '<vehicle><c d="normal_block"><o r="1" bc="E232"/></c><c d="normal_block"><o bc="59FF"/></c><c d="normal_block"><o bc="FFFFFF"/></c></vehicle>';
 
-        const result = deAdditize(xml);
+        const result = optimizeVehicle(xml);
 
         assertEqual(
           result.data,
@@ -126,7 +126,7 @@
 
           const expected = `<vehicle><c d="${componentName}"><o bc="E232"><vp z="3"/><logic_slots/></o></c></vehicle>`;
 
-          const result = deAdditize(xml);
+          const result = optimizeVehicle(xml);
 
           assertEqual(
             result.data,
@@ -143,7 +143,7 @@
         const expected =
           '<vehicle><c d="08_wedge_4"><o r="1,0,0,0,1,0,0,0,1"><vp y="1"/></o></c></vehicle>';
 
-        const result = deAdditize(xml);
+        const result = optimizeVehicle(xml);
 
         assertEqual(
           result.data,
@@ -158,7 +158,7 @@
 
           const expected = `<vehicle><c d="${componentName}"><o bc="E232"/></c></vehicle>`;
 
-          const result = deAdditize(xml);
+          const result = optimizeVehicle(xml);
 
           assertEqual(
             result.data,
@@ -175,7 +175,7 @@
         const expected =
           '<vehicle><c d="no_sleep"><o sc="6,454545,x,454545,x,969696,x"/></c></vehicle>';
 
-        const result = deAdditize(xml);
+        const result = optimizeVehicle(xml);
 
         assertEqual(
           result.data,
@@ -193,7 +193,7 @@
         const expected =
           '<vehicle><c d="no_sleep"><o bc="E232" bc2="FFFFFF" bc3="FFFFFF"/></c></vehicle>';
 
-        const result = deAdditize(xml);
+        const result = optimizeVehicle(xml);
 
         assertEqual(
           result.data,
