@@ -1,10 +1,6 @@
-# Vehicle Optimizer
+## Vehicle Optimizer
 
 A small browser-based tool that removes unnecessary file size from Stormworks vehicle files.
-
-### How it works
-
-Vehicle optimizer scans vehicle XML locally, removing numerous meaningless attributes; Saving file size and increasing ingame performance.
 
 ---
 
