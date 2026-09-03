@@ -1,1 +1,1 @@
-export { deAdditize } from "./parser.js";
+export { optimizeVehicle } from "./parser.js";

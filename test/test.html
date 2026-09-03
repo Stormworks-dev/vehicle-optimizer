@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>deAdditizer tests</title>
+    <title>tests</title>
   </head>
 
   <body>
@@ -11,8 +11,12 @@
     <ul id="results"></ul>
 
     <script type="module">
-      import { deAdditize } from "../src/index.js";
-      import { additiveComponents } from "../src/components.js";
+      import { optimizeVehicle } from "../src/index.js";
+      import {
+        additiveComponents,
+        nonRotatingComponents,
+        defaultRotationRemovableComponents,
+      } from "../src/components.js";
 
       const summary = document.querySelector("#summary");
       const results = document.querySelector("#results");
@@ -31,7 +35,7 @@
           console.log(`PASS: ${name}`);
         } catch (error) {
           failed++;
-          item.textContent = `FAIL: ${name} — ${error.message}`;
+          item.textContent = `FAIL: ${name} | ${error.message}`;
           console.error(`FAIL: ${name}`, error);
         }
 
@@ -46,80 +50,157 @@
         }
       }
 
-      test("removes ac from normal component", () => {
+      test("removes ac and numeric sc from normal component", () => {
         const xml =
           '<vehicle><c d="normal_block"><o bc="E232" ac="E232" sc="6"/></c></vehicle>';
 
         const expected =
-          '<vehicle><c d="normal_block"><o bc="E232" sc="6"/></c></vehicle>';
+          '<vehicle><c d="normal_block"><o bc="E232"/></c></vehicle>';
 
-        const result = deAdditize(xml);
+        const result = optimizeVehicle(xml);
 
         assertEqual(result.data, expected, "Output was modified incorrectly");
         assertEqual(result.blocksChanged, 1, "Wrong blocksChanged count");
         assertEqual(result.blocksPreserved, 0, "Wrong blocksPreserved count");
       });
 
-      test("preserves ac on additive component", () => {
-        const componentName = [...additiveComponents][0];
+      for (const componentName of additiveComponents) {
+        test(`preserves ac on additive component: ${componentName}`, () => {
+          const xml = `<vehicle><c d="${componentName}"><o bc="E232" ac="E232" sc="6"/></c></vehicle>`;
 
-        if (!componentName) {
-          throw new Error("No additive components are defined");
-        }
+          const expected = `<vehicle><c d="${componentName}"><o bc="E232" ac="E232"/></c></vehicle>`;
 
-        const xml = `<vehicle><c d="${componentName}"><o bc="E232" ac="E232" sc="6"/></c></vehicle>`;
+          const result = optimizeVehicle(xml);
 
-        const result = deAdditize(xml);
+          assertEqual(result.data, expected, "Output was modified incorrectly");
+          assertEqual(result.blocksChanged, 0, "Wrong blocksChanged count");
+          assertEqual(result.blocksPreserved, 1, "Wrong blocksPreserved count");
+        });
+      }
 
-        assertEqual(result.data, xml, "Additive component was modified");
-        assertEqual(result.blocksChanged, 0, "Wrong blocksChanged count");
-        assertEqual(result.blocksPreserved, 1, "Wrong blocksPreserved count");
-      });
-
-      test("leaves component without ac untouched", () => {
+      test("removes numeric sc without ac", () => {
         const xml =
           '<vehicle><c d="normal_block"><o bc="E232" sc="6"/></c></vehicle>';
 
-        const result = deAdditize(xml);
+        const expected =
+          '<vehicle><c d="normal_block"><o bc="E232"/></c></vehicle>';
 
-        assertEqual(result.data, xml, "Component without ac was modified");
+        const result = optimizeVehicle(xml);
+
+        assertEqual(result.data, expected, "Output was modified incorrectly");
         assertEqual(result.blocksChanged, 0, "Wrong blocksChanged count");
         assertEqual(result.blocksPreserved, 0, "Wrong blocksPreserved count");
       });
 
-      test("handles mixed components correctly", () => {
-        const componentName = [...additiveComponents][0];
+      test("leaves component without ac or sc untouched", () => {
+        const xml = '<vehicle><c d="normal_block"><o bc="E232"/></c></vehicle>';
 
-        if (!componentName) {
-          throw new Error("No additive components are defined");
-        }
+        const result = optimizeVehicle(xml);
 
-        const xml = `<vehicle><c d="normal_block"><o ac="E232"/></c><c d="${componentName}"><o ac="E232"/></c><c d="normal_block"><o bc="E232"/></c><c d="normal_block"><o ac="59FF"/></c></vehicle>`;
-
-        const expected = `<vehicle><c d="normal_block"><o/></c><c d="${componentName}"><o ac="E232"/></c><c d="normal_block"><o bc="E232"/></c><c d="normal_block"><o/></c></vehicle>`;
-
-        const result = deAdditize(xml);
-
-        assertEqual(
-          result.data,
-          expected,
-          "Mixed components were handled incorrectly",
-        );
-        assertEqual(result.blocksChanged, 2, "Wrong blocksChanged count");
-        assertEqual(result.blocksPreserved, 1, "Wrong blocksPreserved count");
+        assertEqual(result.data, xml, "Component was modified");
+        assertEqual(result.blocksChanged, 0, "Wrong blocksChanged count");
+        assertEqual(result.blocksPreserved, 0, "Wrong blocksPreserved count");
       });
 
-      test("removes multiple ac attributes without artifacts", () => {
+      test("removes ac and numeric sc from multiple components", () => {
         const xml =
           '<vehicle><c d="normal_block"><o r="1" bc="E232" ac="E232" sc="6"/></c><c d="normal_block"><o bc="59FF" ac="59FF" sc="17"/></c><c d="normal_block"><o bc="FFFFFF" ac="FFFFFF" sc="6"/></c></vehicle>';
 
         const expected =
-          '<vehicle><c d="normal_block"><o r="1" bc="E232" sc="6"/></c><c d="normal_block"><o bc="59FF" sc="17"/></c><c d="normal_block"><o bc="FFFFFF" sc="6"/></c></vehicle>';
+          '<vehicle><c d="normal_block"><o r="1" bc="E232"/></c><c d="normal_block"><o bc="59FF"/></c><c d="normal_block"><o bc="FFFFFF"/></c></vehicle>';
 
-        const result = deAdditize(xml);
+        const result = optimizeVehicle(xml);
 
-        assertEqual(result.data, expected, "Multiple removals left artifacts");
+        assertEqual(
+          result.data,
+          expected,
+          "Multiple removals were handled incorrectly",
+        );
         assertEqual(result.blocksChanged, 3, "Wrong blocksChanged count");
+        assertEqual(result.blocksPreserved, 0, "Wrong blocksPreserved count");
+      });
+
+      for (const componentName of defaultRotationRemovableComponents) {
+        test(`removes default rotation: ${componentName}`, () => {
+          const xml = `<vehicle><c d="${componentName}"><o r="1,0,0,0,1,0,0,0,1" bc="E232" sc="6"><vp z="3"/><logic_slots/></o></c></vehicle>`;
+
+          const expected = `<vehicle><c d="${componentName}"><o bc="E232"><vp z="3"/><logic_slots/></o></c></vehicle>`;
+
+          const result = optimizeVehicle(xml);
+
+          assertEqual(
+            result.data,
+            expected,
+            "Default rotation was handled incorrectly",
+          );
+        });
+      }
+
+      test("preserves default rotation on unverified component", () => {
+        const xml =
+          '<vehicle><c d="08_wedge_4"><o r="1,0,0,0,1,0,0,0,1" sc="17"><vp y="1"/></o></c></vehicle>';
+
+        const expected =
+          '<vehicle><c d="08_wedge_4"><o r="1,0,0,0,1,0,0,0,1"><vp y="1"/></o></c></vehicle>';
+
+        const result = optimizeVehicle(xml);
+
+        assertEqual(
+          result.data,
+          expected,
+          "Default rotation was incorrectly removed",
+        );
+      });
+
+      for (const componentName of nonRotatingComponents) {
+        test(`removes pure rotation: ${componentName}`, () => {
+          const xml = `<vehicle><c d="${componentName}"><o r="1,0,0,0,0,-1,0,1,0" bc="E232"/></c></vehicle>`;
+
+          const expected = `<vehicle><c d="${componentName}"><o bc="E232"/></c></vehicle>`;
+
+          const result = optimizeVehicle(xml);
+
+          assertEqual(
+            result.data,
+            expected,
+            "Pure rotation was handled incorrectly",
+          );
+        });
+      }
+
+      test("keeps meaningful sc and removes all bc colors", () => {
+        const xml =
+          '<vehicle><c d="no_sleep"><o bc="E232" bc2="FFFFFF" bc3="FFFFFF" sc="6,454545,x,454545,x,969696,x"/></c></vehicle>';
+
+        const expected =
+          '<vehicle><c d="no_sleep"><o sc="6,454545,x,454545,x,969696,x"/></c></vehicle>';
+
+        const result = optimizeVehicle(xml);
+
+        assertEqual(
+          result.data,
+          expected,
+          "Meaningful sc and bc colors were handled incorrectly",
+        );
+        assertEqual(result.blocksChanged, 0, "Wrong blocksChanged count");
+        assertEqual(result.blocksPreserved, 0, "Wrong blocksPreserved count");
+      });
+
+      test("keeps bc colors when sc is only a number", () => {
+        const xml =
+          '<vehicle><c d="no_sleep"><o bc="E232" bc2="FFFFFF" bc3="FFFFFF" sc="6"/></c></vehicle>';
+
+        const expected =
+          '<vehicle><c d="no_sleep"><o bc="E232" bc2="FFFFFF" bc3="FFFFFF"/></c></vehicle>';
+
+        const result = optimizeVehicle(xml);
+
+        assertEqual(
+          result.data,
+          expected,
+          "bc colors were modified incorrectly",
+        );
+        assertEqual(result.blocksChanged, 0, "Wrong blocksChanged count");
         assertEqual(result.blocksPreserved, 0, "Wrong blocksPreserved count");
       });
 

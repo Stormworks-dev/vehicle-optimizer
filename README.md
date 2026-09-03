@@ -1,16 +1,12 @@
-# deAdditizer
+## Vehicle Optimizer
 
 A small browser-based tool that removes unnecessary file size from Stormworks vehicle files.
 
-### How it works
-
-deAdditizer parses vehicle XML locally, removing `ac` attributes where additive color isn't needed while preserving them where it is.
-
 ---
 
-### Deployed
+### Deployment
 
-Built for upcoming deployment at [stormworks.dev/tools/deAdditizer](https://stormworks.dev/tools/deAdditizer)
+Built for upcoming deployment at [stormworks.dev/vehicle-optimizer](https://stormworks.dev/vehicle-optimizer)
 
 #### Testing
 
