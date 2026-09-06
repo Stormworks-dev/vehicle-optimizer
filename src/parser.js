@@ -4,6 +4,7 @@ import {
   nonRotatingComponents,
   defaultRotationRemovableComponents,
   bcPreservedWithScComponents,
+  scRemovableComponents,
 } from "./components.js";
 
 function isWhitespace(code) {
@@ -423,7 +424,7 @@ function processObject(xml, objectStart, objectEnd, componentEnd, componentId) {
       scPresent = true;
       scNumeric = isNumericSc(xml, valueStart, valueEnd);
 
-      if (scNumeric) {
+      if (scNumeric || scRemovableComponents.has(componentId)) {
         addRemoval(removals, attrStart, attrEnd);
       }
     } else if (isBcAttribute(xml, nameStart, nameEnd)) {
@@ -446,6 +447,7 @@ function processObject(xml, objectStart, objectEnd, componentEnd, componentId) {
   if (
     scPresent &&
     !scNumeric &&
+    !scRemovableComponents.has(componentId) &&
     !bcPreservedWithScComponents.has(componentId)
   ) {
     for (let i = 0; i < bcRanges.length; i += 2) {

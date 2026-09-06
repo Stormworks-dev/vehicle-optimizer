@@ -17,6 +17,7 @@
         nonRotatingComponents,
         defaultRotationRemovableComponents,
         bcPreservedWithScComponents,
+        scRemovableComponents,
       } from "../src/components.js";
 
       const summary = document.querySelector("#summary");
@@ -217,6 +218,24 @@
             result.data,
             expected,
             "bc colors were incorrectly removed",
+          );
+          assertEqual(result.blocksChanged, 0, "Wrong blocksChanged count");
+          assertEqual(result.blocksPreserved, 0, "Wrong blocksPreserved count");
+        });
+      }
+
+      for (const componentName of scRemovableComponents) {
+        test(`removes sc and preserves bc: ${componentName}`, () => {
+          const xml = `<vehicle><c d="${componentName}"><o bc="E232" bc2="FFFFFF" bc3="FFFFFF" sc="6,454545,x,454545,x,969696,x"/></c></vehicle>`;
+
+          const expected = `<vehicle><c d="${componentName}"><o bc="E232" bc2="FFFFFF" bc3="FFFFFF"/></c></vehicle>`;
+
+          const result = optimizeVehicle(xml);
+
+          assertEqual(
+            result.data,
+            expected,
+            "sc or bc was modified incorrectly",
           );
           assertEqual(result.blocksChanged, 0, "Wrong blocksChanged count");
           assertEqual(result.blocksPreserved, 0, "Wrong blocksPreserved count");
