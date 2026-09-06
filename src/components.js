@@ -23,3 +23,8 @@ export const bcPreservedWithScComponents = new Set([
   "test_bc_preserved_component",
   //
 ]);
+
+export const scRemovableComponents = new Set([
+  "test_sc_removable_component",
+  //
+]);
