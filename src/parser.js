@@ -3,6 +3,7 @@ import {
   additiveComponents,
   nonRotatingComponents,
   defaultRotationRemovableComponents,
+  bcPreservedWithScComponents,
 } from "./components.js";
 
 function isWhitespace(code) {
@@ -442,7 +443,11 @@ function processObject(xml, objectStart, objectEnd, componentEnd, componentId) {
     }
   }
 
-  if (scPresent && !scNumeric) {
+  if (
+    scPresent &&
+    !scNumeric &&
+    !bcPreservedWithScComponents.has(componentId)
+  ) {
     for (let i = 0; i < bcRanges.length; i += 2) {
       addRemoval(removals, bcRanges[i], bcRanges[i + 1]);
     }

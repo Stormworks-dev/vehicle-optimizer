@@ -18,3 +18,8 @@ export const defaultRotationRemovableComponents = new Set([
   "multibody_compact_pivot_b",
   //
 ]);
+
+export const bcPreservedWithScComponents = new Set([
+  "test_bc_preserved_component",
+  //
+]);

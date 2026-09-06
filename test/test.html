@@ -16,6 +16,7 @@
         additiveComponents,
         nonRotatingComponents,
         defaultRotationRemovableComponents,
+        bcPreservedWithScComponents,
       } from "../src/components.js";
 
       const summary = document.querySelector("#summary");
@@ -203,6 +204,24 @@
         assertEqual(result.blocksChanged, 0, "Wrong blocksChanged count");
         assertEqual(result.blocksPreserved, 0, "Wrong blocksPreserved count");
       });
+
+      for (const componentName of bcPreservedWithScComponents) {
+        test(`preserves bc with meaningful sc: ${componentName}`, () => {
+          const xml = `<vehicle><c d="${componentName}"><o bc="E232" bc2="FFFFFF" bc3="FFFFFF" sc="6,454545,x,454545,x,969696,x"/></c></vehicle>`;
+
+          const expected = `<vehicle><c d="${componentName}"><o bc="E232" bc2="FFFFFF" bc3="FFFFFF" sc="6,454545,x,454545,x,969696,x"/></c></vehicle>`;
+
+          const result = optimizeVehicle(xml);
+
+          assertEqual(
+            result.data,
+            expected,
+            "bc colors were incorrectly removed",
+          );
+          assertEqual(result.blocksChanged, 0, "Wrong blocksChanged count");
+          assertEqual(result.blocksPreserved, 0, "Wrong blocksPreserved count");
+        });
+      }
 
       summary.textContent = `${passed} passed, ${failed} failed`;
 
