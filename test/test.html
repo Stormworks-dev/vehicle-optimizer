@@ -1,4 +1,5 @@
 <!doctype html>
+
 <html>
   <head>
     <meta charset="UTF-8" />
@@ -13,6 +14,7 @@
     <script type="module">
       import { optimizeVehicle } from "../src/index.js";
       import {
+        defaultRotation,
         additiveComponents,
         nonRotatingComponents,
         defaultRotationRemovableComponents,
@@ -122,11 +124,43 @@
         assertEqual(result.blocksPreserved, 0, "Wrong blocksPreserved count");
       });
 
+      test("default rotation test configuration", () => {
+        assertEqual(
+          defaultRotation,
+          "1,0,0,0,1,0,0,0,1",
+          "defaultRotation has the wrong value",
+        );
+
+        assertEqual(
+          defaultRotationRemovableComponents.has("01_block_weight"),
+          true,
+          "01_block_weight is missing from defaultRotationRemovableComponents",
+        );
+
+        assertEqual(
+          defaultRotationRemovableComponents.has("no_sleep"),
+          true,
+          "no_sleep is missing from defaultRotationRemovableComponents",
+        );
+
+        assertEqual(
+          defaultRotationRemovableComponents.has("map_icon"),
+          true,
+          "map_icon is missing from defaultRotationRemovableComponents",
+        );
+
+        assertEqual(
+          defaultRotationRemovableComponents.has("multibody_compact_pivot_b"),
+          true,
+          "multibody_compact_pivot_b is missing from defaultRotationRemovableComponents",
+        );
+      });
+
       for (const componentName of defaultRotationRemovableComponents) {
         test(`removes default rotation: ${componentName}`, () => {
-          const xml = `<vehicle><c d="${componentName}"><o r="1,0,0,0,1,0,0,0,1" bc="E232" sc="6"><vp z="3"/><logic_slots/></o></c></vehicle>`;
+          const xml = `<vehicle><c d="${componentName}"><o r="1,0,0,0,1,0,0,0,1" bc="E232" sc="6"/></c></vehicle>`;
 
-          const expected = `<vehicle><c d="${componentName}"><o bc="E232"><vp z="3"/><logic_slots/></o></c></vehicle>`;
+          const expected = `<vehicle><c d="${componentName}"><o bc="E232"/></c></vehicle>`;
 
           const result = optimizeVehicle(xml);
 
@@ -140,10 +174,10 @@
 
       test("preserves default rotation on unverified component", () => {
         const xml =
-          '<vehicle><c d="08_wedge_4"><o r="1,0,0,0,1,0,0,0,1" sc="17"><vp y="1"/></o></c></vehicle>';
+          '<vehicle><c d="08_wedge_4"><o r="1,0,0,0,1,0,0,0,1" sc="17"/></c></vehicle>';
 
         const expected =
-          '<vehicle><c d="08_wedge_4"><o r="1,0,0,0,1,0,0,0,1"><vp y="1"/></o></c></vehicle>';
+          '<vehicle><c d="08_wedge_4"><o r="1,0,0,0,1,0,0,0,1" sc="17"/></c></vehicle>';
 
         const result = optimizeVehicle(xml);
 
@@ -207,7 +241,7 @@
       });
 
       for (const componentName of bcPreservedWithScComponents) {
-        test(`preserves bc with meaningful sc: ${componentName}`, () => {
+        test(`preserves bc and sc on bc-preserved component: ${componentName}`, () => {
           const xml = `<vehicle><c d="${componentName}"><o bc="E232" bc2="FFFFFF" bc3="FFFFFF" sc="6,454545,x,454545,x,969696,x"/></c></vehicle>`;
 
           const expected = `<vehicle><c d="${componentName}"><o bc="E232" bc2="FFFFFF" bc3="FFFFFF" sc="6,454545,x,454545,x,969696,x"/></c></vehicle>`;
@@ -217,7 +251,7 @@
           assertEqual(
             result.data,
             expected,
-            "bc colors were incorrectly removed",
+            "bc or sc was modified incorrectly",
           );
           assertEqual(result.blocksChanged, 0, "Wrong blocksChanged count");
           assertEqual(result.blocksPreserved, 0, "Wrong blocksPreserved count");
@@ -225,7 +259,7 @@
       }
 
       for (const componentName of scRemovableComponents) {
-        test(`removes sc and preserves bc: ${componentName}`, () => {
+        test(`removes meaningful sc and preserves bc: ${componentName}`, () => {
           const xml = `<vehicle><c d="${componentName}"><o bc="E232" bc2="FFFFFF" bc3="FFFFFF" sc="6,454545,x,454545,x,969696,x"/></c></vehicle>`;
 
           const expected = `<vehicle><c d="${componentName}"><o bc="E232" bc2="FFFFFF" bc3="FFFFFF"/></c></vehicle>`;
@@ -236,6 +270,22 @@
             result.data,
             expected,
             "sc or bc was modified incorrectly",
+          );
+          assertEqual(result.blocksChanged, 0, "Wrong blocksChanged count");
+          assertEqual(result.blocksPreserved, 0, "Wrong blocksPreserved count");
+        });
+
+        test(`removes numeric sc and preserves bc: ${componentName}`, () => {
+          const xml = `<vehicle><c d="${componentName}"><o bc="E232" bc2="FFFFFF" bc3="FFFFFF" sc="6"/></c></vehicle>`;
+
+          const expected = `<vehicle><c d="${componentName}"><o bc="E232" bc2="FFFFFF" bc3="FFFFFF"/></c></vehicle>`;
+
+          const result = optimizeVehicle(xml);
+
+          assertEqual(
+            result.data,
+            expected,
+            "numeric sc or bc was modified incorrectly",
           );
           assertEqual(result.blocksChanged, 0, "Wrong blocksChanged count");
           assertEqual(result.blocksPreserved, 0, "Wrong blocksPreserved count");

@@ -342,6 +342,7 @@ function isEmptyLogicSlots(xml, start, end) {
 function processObject(xml, objectStart, objectEnd, componentEnd, componentId) {
   const removals = [];
   const bcRanges = [];
+  const rRanges = [];
 
   let scPresent = false;
   let scNumeric = false;
@@ -412,13 +413,16 @@ function processObject(xml, objectStart, objectEnd, componentEnd, componentId) {
         blocksChanged++;
       }
     } else if (matches(xml, nameStart, nameEnd, "r")) {
-      if (
-        (isDefaultRotation(xml, valueStart, valueEnd) &&
-          defaultRotationRemovableComponents.has(componentId)) ||
-        (isPureRotation(xml, valueStart, valueEnd) &&
-          (componentId === null || nonRotatingComponents.has(componentId)))
-      ) {
-        addRemoval(removals, attrStart, attrEnd);
+      const removableDefaultRotation =
+        isDefaultRotation(xml, valueStart, valueEnd) &&
+        defaultRotationRemovableComponents.has(componentId);
+
+      const removablePureRotation =
+        isPureRotation(xml, valueStart, valueEnd) &&
+        (componentId === null || nonRotatingComponents.has(componentId));
+
+      if (removableDefaultRotation || removablePureRotation) {
+        rRanges.push(attrStart, attrEnd);
       }
     } else if (matches(xml, nameStart, nameEnd, "sc")) {
       scPresent = true;
@@ -441,6 +445,12 @@ function processObject(xml, objectStart, objectEnd, componentEnd, componentId) {
 
     if (cursor < objectEnd) {
       cursor++;
+    }
+  }
+
+  if (!scPresent || scNumeric) {
+    for (let i = 0; i < rRanges.length; i += 2) {
+      addRemoval(removals, rRanges[i], rRanges[i + 1]);
     }
   }
 
