@@ -3,7 +3,6 @@ import {
   additiveComponents,
   nonRotatingComponents,
   defaultRotationRemovableComponents,
-  bcPreservedWithScComponents,
   scRemovableComponents,
 } from "./components.js";
 
@@ -341,8 +340,10 @@ function isEmptyLogicSlots(xml, start, end) {
 
 function processObject(xml, objectStart, objectEnd, componentEnd, componentId) {
   const removals = [];
-  const bcRanges = [];
   const rRanges = [];
+
+  let bcCount = 0;
+  let bcRange = null;
 
   let scPresent = false;
   let scNumeric = false;
@@ -432,7 +433,11 @@ function processObject(xml, objectStart, objectEnd, componentEnd, componentId) {
         addRemoval(removals, attrStart, attrEnd);
       }
     } else if (isBcAttribute(xml, nameStart, nameEnd)) {
-      bcRanges.push(attrStart, attrEnd);
+      bcCount++;
+
+      if (nameEnd - nameStart === 2) {
+        bcRange = [attrStart, attrEnd];
+      }
     } else if (matches(xml, nameStart, nameEnd, "name")) {
       if (matches(xml, valueStart, valueEnd, "Microcontroller")) {
         addRemoval(removals, attrStart, attrEnd);
@@ -458,11 +463,10 @@ function processObject(xml, objectStart, objectEnd, componentEnd, componentId) {
     scPresent &&
     !scNumeric &&
     !scRemovableComponents.has(componentId) &&
-    !bcPreservedWithScComponents.has(componentId)
+    bcCount === 1 &&
+    bcRange !== null
   ) {
-    for (let i = 0; i < bcRanges.length; i += 2) {
-      addRemoval(removals, bcRanges[i], bcRanges[i + 1]);
-    }
+    addRemoval(removals, bcRange[0], bcRange[1]);
   }
 
   cursor = objectEnd + 1;
