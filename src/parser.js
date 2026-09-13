@@ -3,6 +3,7 @@ import {
   additiveComponents,
   nonRotatingComponents,
   defaultRotationRemovableComponents,
+  bcPreservedWithScComponents,
   scRemovableComponents,
 } from "./components.js";
 
@@ -435,7 +436,7 @@ function processObject(xml, objectStart, objectEnd, componentEnd, componentId) {
     } else if (isBcAttribute(xml, nameStart, nameEnd)) {
       bcCount++;
 
-      if (nameEnd - nameStart === 2) {
+      if (bcCount === 1) {
         bcRange = [attrStart, attrEnd];
       }
     } else if (matches(xml, nameStart, nameEnd, "name")) {
@@ -459,12 +460,17 @@ function processObject(xml, objectStart, objectEnd, componentEnd, componentId) {
     }
   }
 
+  // BC safety:
+  // - Multiple BC attributes are always preserved.
+  // - A single BC is removed only when the component is not in
+  //   bcPreservedWithScComponents and has a non-numeric SC.
   if (
     scPresent &&
     !scNumeric &&
     !scRemovableComponents.has(componentId) &&
     bcCount === 1 &&
-    bcRange !== null
+    bcRange !== null &&
+    !bcPreservedWithScComponents.has(componentId)
   ) {
     addRemoval(removals, bcRange[0], bcRange[1]);
   }
