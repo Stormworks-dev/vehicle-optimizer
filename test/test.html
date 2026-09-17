@@ -64,9 +64,10 @@
         );
       }
 
+      const meaningfulSc = "6,454545,x,454545,x,969696,x";
+
       test("removes ac", () => {
         const xml = '<vehicle><c d="normal_block"><o ac="E232"/></c></vehicle>';
-
         const expected = '<vehicle><c d="normal_block"><o/></c></vehicle>';
 
         optimize(xml, expected, 1);
@@ -82,23 +83,20 @@
 
       test("removes numeric sc", () => {
         const xml = '<vehicle><c d="normal_block"><o sc="6"/></c></vehicle>';
-
         const expected = '<vehicle><c d="normal_block"><o/></c></vehicle>';
 
         optimize(xml, expected);
       });
 
       test("keeps meaningful sc", () => {
-        const xml =
-          '<vehicle><c d="normal_block"><o sc="6,454545,x,454545,x,969696,x"/></c></vehicle>';
+        const xml = `<vehicle><c d="normal_block"><o sc="${meaningfulSc}"/></c></vehicle>`;
 
         optimize(xml, xml);
       });
 
       for (const component of scRemovableComponents) {
         test(`removes sc on ${component}`, () => {
-          const xml = `<vehicle><c d="${component}"><o sc="6,454545,x,454545,x,969696,x"/></c></vehicle>`;
-
+          const xml = `<vehicle><c d="${component}"><o sc="${meaningfulSc}"/></c></vehicle>`;
           const expected = `<vehicle><c d="${component}"><o/></c></vehicle>`;
 
           optimize(xml, expected);
@@ -106,11 +104,8 @@
       }
 
       test("removes single bc with meaningful sc", () => {
-        const xml =
-          '<vehicle><c d="normal_block"><o bc="E232" sc="6,454545,x,454545,x,969696,x"/></c></vehicle>';
-
-        const expected =
-          '<vehicle><c d="normal_block"><o sc="6,454545,x,454545,x,969696,x"/></c></vehicle>';
+        const xml = `<vehicle><c d="normal_block"><o bc="E232" sc="${meaningfulSc}"/></c></vehicle>`;
+        const expected = `<vehicle><c d="normal_block"><o sc="${meaningfulSc}"/></c></vehicle>`;
 
         optimize(xml, expected);
       });
@@ -118,7 +113,6 @@
       test("keeps bc with numeric sc", () => {
         const xml =
           '<vehicle><c d="normal_block"><o bc="E232" sc="6"/></c></vehicle>';
-
         const expected =
           '<vehicle><c d="normal_block"><o bc="E232"/></c></vehicle>';
 
@@ -132,8 +126,7 @@
       });
 
       test("keeps multiple bc with meaningful sc", () => {
-        const xml =
-          '<vehicle><c d="normal_block"><o bc="E232" bc2="FFFFFF" bc3="112233" sc="6,454545,x,454545,x,969696,x"/></c></vehicle>';
+        const xml = `<vehicle><c d="normal_block"><o bc="E232" bc2="FFFFFF" bc3="112233" sc="${meaningfulSc}"/></c></vehicle>`;
 
         optimize(xml, xml);
       });
@@ -141,7 +134,6 @@
       test("keeps multiple bc with numeric sc", () => {
         const xml =
           '<vehicle><c d="normal_block"><o bc="E232" bc2="FFFFFF" bc3="112233" sc="6"/></c></vehicle>';
-
         const expected =
           '<vehicle><c d="normal_block"><o bc="E232" bc2="FFFFFF" bc3="112233"/></c></vehicle>';
 
@@ -155,8 +147,7 @@
           throw new Error("scremovablecomponents is empty");
         }
 
-        const xml = `<vehicle><c d="${component}"><o bc="E232" bc2="FFFFFF" sc="6,454545,x,454545,x,969696,x"/></c></vehicle>`;
-
+        const xml = `<vehicle><c d="${component}"><o bc="E232" bc2="FFFFFF" sc="${meaningfulSc}"/></c></vehicle>`;
         const expected = `<vehicle><c d="${component}"><o bc="E232" bc2="FFFFFF"/></c></vehicle>`;
 
         optimize(xml, expected);
@@ -164,45 +155,35 @@
 
       for (const component of bcPreservedWithScComponents) {
         test(`keeps single bc on ${component}`, () => {
-          const xml = `<vehicle><c d="${component}"><o bc="E232" sc="6,454545,x,454545,x,969696,x"/></c></vehicle>`;
+          const xml = `<vehicle><c d="${component}"><o bc="E232" sc="${meaningfulSc}"/></c></vehicle>`;
 
           optimize(xml, xml);
         });
       }
 
-      test("recognizes bc1", () => {
-        const xml =
-          '<vehicle><c d="normal_block"><o bc1="E232" sc="6,454545,x,454545,x,969696,x"/></c></vehicle>';
-
-        const expected =
-          '<vehicle><c d="normal_block"><o sc="6,454545,x,454545,x,969696,x"/></c></vehicle>';
+      test("removes bc1 with meaningful sc", () => {
+        const xml = `<vehicle><c d="normal_block"><o bc1="E232" sc="${meaningfulSc}"/></c></vehicle>`;
+        const expected = `<vehicle><c d="normal_block"><o sc="${meaningfulSc}"/></c></vehicle>`;
 
         optimize(xml, expected);
       });
 
-      test("recognizes bc2", () => {
-        const xml =
-          '<vehicle><c d="normal_block"><o bc2="E232" sc="6,454545,x,454545,x,969696,x"/></c></vehicle>';
-
-        const expected =
-          '<vehicle><c d="normal_block"><o sc="6,454545,x,454545,x,969696,x"/></c></vehicle>';
+      test("removes bc2 with meaningful sc", () => {
+        const xml = `<vehicle><c d="normal_block"><o bc2="E232" sc="${meaningfulSc}"/></c></vehicle>`;
+        const expected = `<vehicle><c d="normal_block"><o sc="${meaningfulSc}"/></c></vehicle>`;
 
         optimize(xml, expected);
       });
 
-      test("recognizes bc10", () => {
-        const xml =
-          '<vehicle><c d="normal_block"><o bc10="E232" sc="6,454545,x,454545,x,969696,x"/></c></vehicle>';
-
-        const expected =
-          '<vehicle><c d="normal_block"><o sc="6,454545,x,454545,x,969696,x"/></c></vehicle>';
+      test("removes bc10 with meaningful sc", () => {
+        const xml = `<vehicle><c d="normal_block"><o bc10="E232" sc="${meaningfulSc}"/></c></vehicle>`;
+        const expected = `<vehicle><c d="normal_block"><o sc="${meaningfulSc}"/></c></vehicle>`;
 
         optimize(xml, expected);
       });
 
       test("keeps multiple numbered bc", () => {
-        const xml =
-          '<vehicle><c d="normal_block"><o bc1="E232" bc2="FFFFFF" bc10="112233" sc="6,454545,x,454545,x,969696,x"/></c></vehicle>';
+        const xml = `<vehicle><c d="normal_block"><o bc1="E232" bc2="FFFFFF" bc10="112233" sc="${meaningfulSc}"/></c></vehicle>`;
 
         optimize(xml, xml);
       });
@@ -218,7 +199,6 @@
       for (const component of defaultRotationRemovableComponents) {
         test(`removes default rotation on ${component}`, () => {
           const xml = `<vehicle><c d="${component}"><o r="${defaultRotation}"/></c></vehicle>`;
-
           const expected = `<vehicle><c d="${component}"><o/></c></vehicle>`;
 
           optimize(xml, expected);
@@ -242,7 +222,6 @@
       for (const component of nonRotatingComponents) {
         test(`removes pure rotation on ${component}`, () => {
           const xml = `<vehicle><c d="${component}"><o r="1,0,0,0,0,-1,0,1,0"/></c></vehicle>`;
-
           const expected = `<vehicle><c d="${component}"><o/></c></vehicle>`;
 
           optimize(xml, expected);
@@ -259,15 +238,13 @@
       test("removes rotation with numeric sc", () => {
         const xml =
           '<vehicle><c d="01_block_weight"><o r="1,0,0,0,1,0,0,0,1" sc="6"/></c></vehicle>';
-
         const expected = '<vehicle><c d="01_block_weight"><o/></c></vehicle>';
 
         optimize(xml, expected);
       });
 
       test("keeps rotation with meaningful sc", () => {
-        const xml =
-          '<vehicle><c d="01_block_weight"><o r="1,0,0,0,1,0,0,0,1" sc="6,454545,x,454545,x,969696,x"/></c></vehicle>';
+        const xml = `<vehicle><c d="01_block_weight"><o r="${defaultRotation}" sc="${meaningfulSc}"/></c></vehicle>`;
 
         optimize(xml, xml);
       });
@@ -275,7 +252,6 @@
       test("removes the default name", () => {
         const xml =
           '<vehicle><c d="normal_block"><o name="Microcontroller"/></c></vehicle>';
-
         const expected = '<vehicle><c d="normal_block"><o/></c></vehicle>';
 
         optimize(xml, expected);
@@ -291,7 +267,6 @@
       test("removes the default description", () => {
         const xml =
           '<vehicle><c d="normal_block"><o description="No description set."/></c></vehicle>';
-
         const expected = '<vehicle><c d="normal_block"><o/></c></vehicle>';
 
         optimize(xml, expected);
@@ -306,7 +281,6 @@
 
       test("removes empty slot", () => {
         const xml = '<vehicle><c d="normal_block"><o><slot/></o></c></vehicle>';
-
         const expected = '<vehicle><c d="normal_block"><o></o></c></vehicle>';
 
         optimize(xml, expected);
@@ -315,7 +289,6 @@
       test("removes whitespace slot", () => {
         const xml =
           '<vehicle><c d="normal_block"><o><slot   /></o></c></vehicle>';
-
         const expected = '<vehicle><c d="normal_block"><o></o></c></vehicle>';
 
         optimize(xml, expected);
@@ -331,7 +304,6 @@
       test("removes empty logic slots", () => {
         const xml =
           '<vehicle><c d="normal_block"><o><logic_slots><slot/><slot/></logic_slots></o></c></vehicle>';
-
         const expected = '<vehicle><c d="normal_block"><o></o></c></vehicle>';
 
         optimize(xml, expected);
@@ -362,11 +334,9 @@
       });
 
       test("handles mixed bc cases", () => {
-        const xml =
-          '<vehicle><c d="normal_block"><o bc="E232" sc="6,454545,x,454545,x,969696,x"/></c><c d="normal_block"><o bc="FFFFFF" bc2="112233" sc="6,454545,x,454545,x,969696,x"/></c><c d="normal_block"><o bc="ABCDEF" sc="6"/></c></vehicle>';
+        const xml = `<vehicle><c d="normal_block"><o bc="E232" sc="${meaningfulSc}"/></c><c d="normal_block"><o bc="FFFFFF" bc2="112233" sc="${meaningfulSc}"/></c><c d="normal_block"><o bc="ABCDEF" sc="6"/></c></vehicle>`;
 
-        const expected =
-          '<vehicle><c d="normal_block"><o sc="6,454545,x,454545,x,969696,x"/></c><c d="normal_block"><o bc="FFFFFF" bc2="112233" sc="6,454545,x,454545,x,969696,x"/></c><c d="normal_block"><o bc="ABCDEF"/></c></vehicle>';
+        const expected = `<vehicle><c d="normal_block"><o sc="${meaningfulSc}"/></c><c d="normal_block"><o bc="FFFFFF" bc2="112233" sc="${meaningfulSc}"/></c><c d="normal_block"><o bc="ABCDEF"/></c></vehicle>`;
 
         optimize(xml, expected);
       });

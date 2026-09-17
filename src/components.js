@@ -130,7 +130,6 @@ export const bcPreservedWithScComponents = new Set([
   "radar_advanced_dish",
   "dial",
   "compass",
-  "multibody_compact_pivot_robotic_a",
   "multibody_compact_pivot_b",
   "ladder_small",
 ]);
