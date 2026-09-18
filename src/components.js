@@ -110,6 +110,8 @@ export const bcPreservedWithScComponents = new Set([
   "searchlight_small",
   "button_toggle",
   "button_toggle_2side",
+  "button_push",
+  "button_push_2side",
   "inventory_outfit_parachute",
   "inventory_equipment_defibrillator",
   "trans_block_angle",
@@ -134,6 +136,7 @@ export const bcPreservedWithScComponents = new Set([
   "ladder_small",
   "camera_small",
   "clock",
+  "door_frame_corner",
 ]);
 
 export const scRemovableComponents = new Set([
