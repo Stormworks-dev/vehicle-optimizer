@@ -132,6 +132,7 @@ export const bcPreservedWithScComponents = new Set([
   "compass",
   "multibody_compact_pivot_b",
   "ladder_small",
+  "camera_small",
 ]);
 
 export const scRemovableComponents = new Set([
