@@ -137,6 +137,7 @@ export const bcPreservedWithScComponents = new Set([
   "camera_small",
   "clock",
   "door_frame_corner",
+  "linear_compact_module",
 ]);
 
 export const scRemovableComponents = new Set([
