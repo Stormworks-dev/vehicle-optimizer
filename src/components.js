@@ -138,6 +138,9 @@ export const bcPreservedWithScComponents = new Set([
   "clock",
   "door_frame_corner",
   "linear_compact_module",
+  "jet_engine_turbine_small",
+  "jet_engine_duct_cross",
+  "jet_engine_turbine_medium",
 ]);
 
 export const scRemovableComponents = new Set([
