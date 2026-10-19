@@ -33,6 +33,7 @@ function findNextC(xml, cursor) {
 
     const next = xml.charCodeAt(start + 2);
 
+    //avoid similars like custom and component
     if (next === 62 || next === 47 || isWhitespace(next)) {
       return start;
     }
@@ -95,6 +96,7 @@ function findObjectStart(xml, cursor, end) {
   return -1;
 }
 
+//comp ids are read from double quoted attrs
 function readComponentId(xml, start, end) {
   let cursor = start + 2;
 
@@ -177,6 +179,7 @@ function isDefaultRotation(xml, start, end) {
   return matches(xml, start, end, defaultRotation);
 }
 
+//only absolute sum of 3's
 function isPureRotation(xml, start, end) {
   let cursor = start;
   let count = 0;
@@ -275,6 +278,7 @@ function isBcAttribute(xml, start, end) {
   return true;
 }
 
+//removal ranges ordered by start offset
 function addRemoval(removals, start, end) {
   let cursor = removals.length;
 
@@ -454,6 +458,7 @@ function processObject(xml, objectStart, objectEnd, componentEnd, componentId) {
     }
   }
 
+  //defer rotation til scale
   if (!scPresent || scNumeric) {
     for (let i = 0; i < rRanges.length; i += 2) {
       addRemoval(removals, rRanges[i], rRanges[i + 1]);
@@ -579,6 +584,7 @@ export function optimizeVehicle(xml) {
           componentId,
         );
 
+        //build output from untouched spans between ranges
         for (let i = 0; i < result.removals.length; i += 2) {
           const start = result.removals[i];
           const end = result.removals[i + 1];
